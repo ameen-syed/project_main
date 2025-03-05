@@ -1,17 +1,14 @@
-FROM balenalib/raspberrypi3-debian
+# Use an ARM64-compatible base image
+FROM arm64v8/python:latest  
 
+# Set the working directory
 WORKDIR /app
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    python3 python3-pip python3-dev \
-    build-essential gcc
-
 # Copy application files
-COPY app.py .
+COPY . .
 
-# Install required Python libraries (Add more if needed)
-RUN pip3 install RPi.GPIO
+# Install dependencies (if any)
+RUN pip install -r requirements.txt
 
 # Run the application
-CMD ["python3", "app.py"]
+CMD ["python", "app.py"]
