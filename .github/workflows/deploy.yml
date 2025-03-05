@@ -1,32 +1,22 @@
-name: Deploy to Raspberry Pi
+- name: Deploy to Raspberry Pi
+  uses: appleboy/ssh-action@v0.1.10
+  with:
+    host: ${{ secrets.RPI_HOST }}
+    username: ${{ secrets.RPI_USER }}
+    password: ${{ secrets.RPI_PASSWORD }}
+    script: |
+      echo "Pulling latest Docker image..."
+      docker pull ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest || exit 1
 
-on:
-  push:
-    branches:
-      - main  # Change if needed
-  workflow_dispatch:  # Allows manual trigger from GitHub Actions
+      echo "Verifying image pull..."
+      until docker image inspect ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest > /dev/null 2>&1; do
+        echo "Waiting for image to download..."
+        sleep 5
+      done
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+      echo "Stopping old container..."
+      docker stop my-gpio-app || true
+      docker rm my-gpio-app || true
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Deploy to Raspberry Pi
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.RPI_HOST }}
-          username: ${{ secrets.RPI_USER }}
-          password: ${{ secrets.RPI_PASSWORD }}
-          script: |
-            echo "Pulling latest Docker image..."
-            docker pull ameenulsyed/my-rpi-gpio-app:latest
-            
-            echo "Stopping old container..."
-            docker stop my-gpio-app || true
-            docker rm my-gpio-app || true
-            
-            echo "Running new container..."
-            docker run -d --privileged --name my-gpio-app ameenulsyed/my-rpi-gpio-app
+      echo "Running new container..."
+      docker run -d --privileged --name my-gpio-app ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app
