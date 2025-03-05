@@ -25,7 +25,7 @@ jobs:
             echo "Verifying image pull..."
             until docker image inspect ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest > /dev/null 2>&1; do
               echo "Waiting for image to download..."
-              sleep 5
+              sleep 20
             done
 
             echo "Stopping old container..."
@@ -34,3 +34,4 @@ jobs:
 
             echo "Running new container..."
             docker run -d --privileged --name my-gpio-app ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app
+            sleep 20
