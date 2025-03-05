@@ -1,0 +1,26 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build --platform linux/arm/v7 -t mydockerhubuser/my-rpi-gpio-app .
+          docker tag mydockerhubuser/my-rpi-gpio-app mydockerhubuser/my-rpi-gpio-app:latest
+          docker push mydockerhubuser/my-rpi-gpio-app:latest
