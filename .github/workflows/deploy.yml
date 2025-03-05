@@ -1,16 +1,32 @@
-name: Test CI/CD for Raspberry Pi App
+name: Deploy to Raspberry Pi
 
 on:
   push:
     branches:
-      - main
+      - main  # Change if needed
+  workflow_dispatch:  # Allows manual trigger from GitHub Actions
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Print Hello
-        run: echo "GitHub Actions is working!"
+      - name: Deploy to Raspberry Pi
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.RPI_HOST }}
+          username: ${{ secrets.RPI_USER }}
+          password: ${{ secrets.RPI_PASSWORD }}
+          script: |
+            echo "Pulling latest Docker image..."
+            docker pull ameenulsyed/my-rpi-gpio-app:latest
+            
+            echo "Stopping old container..."
+            docker stop my-gpio-app || true
+            docker rm my-gpio-app || true
+            
+            echo "Running new container..."
+            docker run -d --privileged --name my-gpio-app ameenulsyed/my-rpi-gpio-app
