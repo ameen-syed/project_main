@@ -18,6 +18,8 @@ jobs:
           host: ${{ secrets.RPI_HOST }}
           username: ${{ secrets.RPI_USER }}
           password: ${{ secrets.RPI_PASSWORD }}
+          port: 22
+          timeout: 120s  # Increased timeout
           script: |
             echo "Pulling latest Docker image..."
             docker pull ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest || exit 1
@@ -25,7 +27,7 @@ jobs:
             echo "Verifying image pull..."
             until docker image inspect ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest > /dev/null 2>&1; do
               echo "Waiting for image to download..."
-              sleep 20
+              sleep 5
             done
 
             echo "Stopping old container..."
@@ -34,4 +36,3 @@ jobs:
 
             echo "Running new container..."
             docker run -d --privileged --name my-gpio-app ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app
-            sleep 20
