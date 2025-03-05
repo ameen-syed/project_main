@@ -1,22 +1,36 @@
-- name: Deploy to Raspberry Pi
-  uses: appleboy/ssh-action@v0.1.10
-  with:
-    host: ${{ secrets.RPI_HOST }}
-    username: ${{ secrets.RPI_USER }}
-    password: ${{ secrets.RPI_PASSWORD }}
-    script: |
-      echo "Pulling latest Docker image..."
-      docker pull ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest || exit 1
+name: Deploy to Raspberry Pi
 
-      echo "Verifying image pull..."
-      until docker image inspect ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest > /dev/null 2>&1; do
-        echo "Waiting for image to download..."
-        sleep 5
-      done
+on:
+  push:
+    branches:
+      - main  # Change this if your branch is different
 
-      echo "Stopping old container..."
-      docker stop my-gpio-app || true
-      docker rm my-gpio-app || true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      echo "Running new container..."
-      docker run -d --privileged --name my-gpio-app ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app
+      - name: Deploy to Raspberry Pi
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.RPI_HOST }}
+          username: ${{ secrets.RPI_USER }}
+          password: ${{ secrets.RPI_PASSWORD }}
+          script: |
+            echo "Pulling latest Docker image..."
+            docker pull ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest || exit 1
+
+            echo "Verifying image pull..."
+            until docker image inspect ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest > /dev/null 2>&1; do
+              echo "Waiting for image to download..."
+              sleep 5
+            done
+
+            echo "Stopping old container..."
+            docker stop my-gpio-app || true
+            docker rm my-gpio-app || true
+
+            echo "Running new container..."
+            docker run -d --privileged --name my-gpio-app ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app
