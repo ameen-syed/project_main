@@ -18,17 +18,20 @@ jobs:
           echo "Checking SSH connectivity..."
           echo "RPI_HOST: ${{ secrets.RPI_HOST }}"
           echo "RPI_USER: ${{ secrets.RPI_USER }}"
-
+          
+      - name: Test SSH Connection
+        run: nc -zv ${{ secrets.SSH_HOST }} 22
+  
       - name: Test SSH Connection
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.RPI_HOST }}
           username: ${{ secrets.RPI_USER }}
-          password: ${{ secrets.RPI_PASSWORD }}
+          key: ${{ secrets.RPI_PASSWORD }}
           port: 22
           timeout: 120s
-          script: |
-            echo "SSH Connection Successful!"
+          script_stop: true
+          script: ls -all
 
       - name: Deploy to Raspberry Pi
         uses: appleboy/ssh-action@v0.1.10
