@@ -1,43 +1,52 @@
-- name: Test SSH Connection
-  uses: appleboy/ssh-action@v0.1.10
-  with:
-    host: ${{ secrets.RPI_HOST }}
-    username: ${{ secrets.RPI_USER }}
-    password: ${{ secrets.RPI_PASSWORD }}
-    port: 22
-    timeout: 60s
-    script: |
-      echo "SSH Connection Successful!"
-- name: Deploy to Raspberry Pi
-  on:
+name: Deploy to Raspberry Pi
+
+on:
   push:
     branches:
-      - main  # Change this if your branch is different
+      - main  # Adjust if needed
 
-  jobs:
-    deploy:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v3
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-        - name: Deploy to Raspberry Pi
-          uses: appleboy/ssh-action@v0.1.10
-          with:
-            host: ${{ secrets.RPI_HOST }}
-            username: ${{ secrets.RPI_USER }}
-            password: ${{ secrets.RPI_PASSWORD }}
-            port: 22
-            timeout: 300s  # Increased timeout
-            script: |
-              echo "Pulling latest Docker image..."
-              docker pull ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest || exit 1
-  
-              echo "Verifying image pull..."
-              until docker image inspect ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest > /dev/null 2>&1; do
-                echo "Waiting for image to download..."
-                sleep 5
-              done
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Debug SSH Connection Variables
+        run: |
+          echo "Checking SSH connectivity..."
+          echo "RPI_HOST: ${{ secrets.RPI_HOST }}"
+          echo "RPI_USER: ${{ secrets.RPI_USER }}"
+
+      - name: Test SSH Connection
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.RPI_HOST }}
+          username: ${{ secrets.RPI_USER }}
+          password: ${{ secrets.RPI_PASSWORD }}
+          port: 22
+          timeout: 120s
+          script: |
+            echo "SSH Connection Successful!"
+
+      - name: Deploy to Raspberry Pi
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.RPI_HOST }}
+          username: ${{ secrets.RPI_USER }}
+          password: ${{ secrets.RPI_PASSWORD }}
+          port: 22
+          timeout: 120s
+          script: |
+            echo "Pulling latest Docker image..."
+            docker pull ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest
+
+            echo "Waiting for image download to complete..."
+            until docker images | grep -q "${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app"; do
+              echo "Waiting..."
+              sleep 5
+            done
 
             echo "Stopping old container..."
             docker stop my-gpio-app || true
