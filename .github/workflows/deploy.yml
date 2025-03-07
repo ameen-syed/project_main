@@ -29,7 +29,7 @@ jobs:
           username: ${{ secrets.RPI_USER }}
           key: ${{ secrets.RPI_PASSWORD }}
           port: 22
-          timeout: 120s
+          timeout: 20s
           script_stop: true
           script: ls -all
 
