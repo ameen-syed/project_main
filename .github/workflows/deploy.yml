@@ -19,7 +19,7 @@ jobs:
           echo "RPI_HOST: ${{ secrets.RPI_HOST }}"
           echo "RPI_USER: ${{ secrets.RPI_USER }}"
           
-      - name: Test SSH Connection
+      - name: Test SSH Connection dummy
         run: nc -zv ${{ secrets.SSH_HOST }} 22
   
       - name: Test SSH Connection
