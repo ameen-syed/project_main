@@ -54,3 +54,5 @@ jobs:
 
             echo "Running new container..."
             docker run -d --privileged --name my-gpio-app ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app
+          debug: true
+          
