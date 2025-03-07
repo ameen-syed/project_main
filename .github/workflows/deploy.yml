@@ -1,4 +1,14 @@
-name: Deploy to Raspberry Pi
+- name: Test SSH Connection
+  uses: appleboy/ssh-action@v0.1.10
+  with:
+    host: ${{ secrets.RPI_HOST }}
+    username: ${{ secrets.RPI_USER }}
+    password: ${{ secrets.RPI_PASSWORD }}
+    port: 22
+    timeout: 60s
+    script: |
+      echo "SSH Connection Successful!"
+- name: Deploy to Raspberry Pi
 
 on:
   push:
