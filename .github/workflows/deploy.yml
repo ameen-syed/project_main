@@ -3,59 +3,17 @@ name: Deploy to Raspberry Pi
 on:
   push:
     branches:
-      - main  # Adjust if needed
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-
+    runs-on: [self-hosted, linux, arm64]  # This makes it run on your Pi
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Debug SSH Connection Variables
-        run: |
-          echo "Checking SSH connectivity..."
-          echo "RPI_HOST: ${{ secrets.RPI_HOST }}"
-          echo "RPI_USER: ${{ secrets.RPI_USER }}"
-          
-      - name: Test SSH Connection
-        run: nc -zv ${{ secrets.RPI_HOST }} 22 || echo "SSH connection failed"
-  
-      - name: Test SSH Connection
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.RPI_HOST }}
-          username: ${{ secrets.RPI_USER }}
-          key: ${{ secrets.RPI_PASSWORD }}
-          port: 22
-          timeout: 120s
-          script_stop: true
-          script: ls -all
+        uses: actions/checkout@v4
 
       - name: Deploy to Raspberry Pi
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.RPI_HOST }}
-          username: ${{ secrets.RPI_USER }}
-          password: ${{ secrets.RPI_PASSWORD }}
-          port: 22
-          timeout: 120s
-          script: |
-            echo "Pulling latest Docker image..."
-            docker pull ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest
-
-            echo "Waiting for image download to complete..."
-            until docker images | grep -q "${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app"; do
-              echo "Waiting..."
-              sleep 5
-            done
-
-            echo "Stopping old container..."
-            docker stop my-gpio-app || true
-            docker rm my-gpio-app || true
-
-            echo "Running new container..."
-            docker run -d --privileged --name my-gpio-app ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app
-          debug: true
-          
+        run: |
+          echo "Connected to Raspberry Pi via Tailscale!"
+          docker pull your-docker-image
+          docker run -d --privileged --name my-gpio-app your-docker-image
