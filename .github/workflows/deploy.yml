@@ -15,5 +15,5 @@ jobs:
       - name: Deploy to Raspberry Pi
         run: |
           echo "Connected to Raspberry Pi via Tailscale!"
-          docker pull your-docker-image
-          docker run -d --privileged --name my-gpio-app your-docker-image
+          docker pull ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest
+          docker run -d --privileged --name my-gpio-app ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app
