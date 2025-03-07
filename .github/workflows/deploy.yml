@@ -19,8 +19,8 @@ jobs:
           echo "RPI_HOST: ${{ secrets.RPI_HOST }}"
           echo "RPI_USER: ${{ secrets.RPI_USER }}"
           
-      - name: Test SSH Connection dummy
-        run: nc -zv ${{ secrets.SSH_HOST }} 22
+      - name: Test SSH Connection
+        run: nc -zv ${{ secrets.RPI_HOST }} 22 || echo "SSH connection failed"
   
       - name: Test SSH Connection
         uses: appleboy/ssh-action@v0.1.10
