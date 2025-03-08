@@ -7,13 +7,18 @@ on:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, linux, arm64]  # This makes it run on your Pi
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.SSH_HOSTNAME }}" >> ~/.ssh/known_hosts
 
       - name: Deploy to Raspberry Pi
         run: |
-          echo "Connected to Raspberry Pi via Tailscale!"
-          docker pull ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest
-          docker run -d --privileged --name my-gpio-app ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app
+          ssh pi@${{ secrets.SSH_HOSTNAME }} "cd /path/to/your/app && git pull && docker-compose up -d"
