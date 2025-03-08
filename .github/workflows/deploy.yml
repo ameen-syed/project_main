@@ -3,14 +3,14 @@ name: Deploy to Raspberry Pi via SSH (Tailscale)
 on:
   push:
     branches:
-      - main  # Change to your deployment branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Checkout repository
+      # ✅ Checkout repository (optional, can be removed if not needed)
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -28,75 +28,29 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "100.106.32.37" >> ~/.ssh/known_hosts
 
-      # ✅ Deploy to Raspberry Pi
+      # ✅ Deploy using Docker Image
       - name: Deploy Code
         run: |
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@100.106.32.37 << 'EOF'
-            # Ensure the project directory exists
-            mkdir -p /home/ameen/project
-            cd /home/ameen/project
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@${{ secrets.RPI_HOST }} << 'EOF'
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            export DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest
 
-            # Check if Git is initialized; if not, clone it
-            if [ ! -d ".git" ]; then
-              git clone https://github.com/ameen-syed/project_main.git .
-            else
-              git pull origin main
-            fi
-
-            # Install Docker Compose if missing
-            if ! command -v docker-compose &> /dev/null; then
+            # Ensure Docker is installed
+            if ! command -v docker &> /dev/null; then
               sudo apt update
-              sudo apt install docker-compose -y
+              sudo apt install -y docker.io
             fi
 
-            # Restart the Docker container
-            docker-compose up -d --build
+            # Login to Docker Hub (if required)
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+            # Pull the latest Docker image
+            docker pull $DOCKER_IMAGE
+
+            # Stop and remove any existing container
+            docker stop rpi-app || true
+            docker rm rpi-app || true
+
+            # Run the new container
+            docker run -d --name rpi-app --restart unless-stopped --privileged $DOCKER_IMAGE
           EOF
-# name: Deploy to Raspberry Pi
-
-# on:
-#   push:
-#     branches:
-#       - main
-
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v4
-
-#       - name: Setup SSH Key
-#         run: |
-#           mkdir -p ~/.ssh
-#           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-#           chmod 600 ~/.ssh/id_ed25519
-#           ssh-keyscan -H "${{ secrets.RPI_HOST }}" >> ~/.ssh/known_hosts
-
-#       - name: Deploy to Raspberry Pi
-#         run: |
-#           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@${{ secrets.RPI_HOST }} << 'EOF'
-#             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-
-#             # Ensure the project directory exists
-#             mkdir -p /home/ameen/project
-#             cd /home/ameen/project
-
-#             # Clone or update the repo
-#             if [ ! -d ".git" ]; then
-#               git clone https://github.com/ameen-syed/project_main.git .
-#             else
-#               git pull origin main
-#             fi
-
-#             # Install Docker & Docker Compose if not installed
-#             if ! command -v docker-compose &> /dev/null; then
-#               sudo apt update
-#               sudo apt install -y docker-compose
-#             fi
-
-#             # Start the application
-#             docker-compose up -d --build
-#           EOF
