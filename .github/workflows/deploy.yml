@@ -10,17 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 🔹 Checkout repository
+      # ✅ Checkout repository
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 🔹 Install Tailscale on GitHub Runner
+      # ✅ Install & Authenticate Tailscale
       - name: Install & Authenticate Tailscale
         run: |
           curl -fsSL https://tailscale.com/install.sh | sh
           sudo tailscale up --authkey ${{ secrets.TAILSCALE_AUTH_KEY }}
 
-      # 🔹 Setup SSH Key for Secure Connection
+      # ✅ Setup SSH Key
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
@@ -28,16 +28,27 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "100.106.32.37" >> ~/.ssh/known_hosts
 
-      # 🔹 Test SSH Connection
-      - name: Test SSH Connection
-        run: |
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@100.106.32.37 "echo 'SSH Connection Successful!'"
-
-      # 🔹 Deploy Code to Raspberry Pi
-      - name: Deploy Code to Raspberry Pi
+      # ✅ Deploy to Raspberry Pi
+      - name: Deploy Code
         run: |
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@100.106.32.37 << 'EOF'
-            cd /home/ameen/project  # Change to your project directory
-            git pull origin main  # Pull latest changes
-            docker-compose up -d --build  # Rebuild & restart services
+            # Ensure the project directory exists
+            mkdir -p /home/ameen/project
+            cd /home/ameen/project
+
+            # Check if Git is initialized; if not, clone it
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/ameen-syed/project_main.git .
+            else
+              git pull origin main
+            fi
+
+            # Install Docker Compose if missing
+            if ! command -v docker-compose &> /dev/null; then
+              sudo apt update
+              sudo apt install docker-compose -y
+            fi
+
+            # Restart the Docker container
+            docker-compose up -d --build
           EOF
