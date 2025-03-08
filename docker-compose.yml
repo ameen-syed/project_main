@@ -1,14 +1,11 @@
-version: '3.8'
+version: "3.8"
 
 services:
   rpi-app:
-    image: ${{ secrets.DOCKER_USERNAME }}/my-rpi-gpio-app:latest  # Replace with your actual image name
-    container_name: rpi-app
-    restart: unless-stopped
+    image: "${DOCKER_USERNAME}/my-rpi-gpio-app:latest"
+    restart: always
+    privileged: true
     volumes:
-      - /home/ameen/app-data:/app/data  # Adjust if needed
-    ports:
-      - "5000:5000"  # Assuming your app runs on port 5000
+      - /dev:/dev
     environment:
-      - ENV=production
-    privileged: true  # If GPIO access is needed
+      - GPIO_MODE=BCM
