@@ -47,7 +47,7 @@ if __name__ == '__main__':
         while True:
             dist = distance()
             print ("Measured Distance = %.1f cm" % dist)
-            if(dist < 8):
+            if(dist < 5):
                 GPIO.output(23,GPIO.HIGH)
                 print ("Danger")
             else:
