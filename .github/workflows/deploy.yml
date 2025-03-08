@@ -17,9 +17,9 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.SSH_HOSTNAME }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.RPI_HOST }}" >> ~/.ssh/known_hosts
 
 
       - name: Deploy to Raspberry Pi
         run: |
-          ssh pi@${{ secrets.SSH_HOSTNAME }} "cd /path/to/your/app && git pull && docker-compose up -d"
+          ssh ameen@${{ secrets.RPI_HOST }} "cd /path/to/your/app && git pull && docker-compose up -d"
