@@ -1,54 +1,47 @@
-name: Deploy to Raspberry Pi via SSH (Tailscale)
+name: Deploy to Raspberry Pi
 
 on:
   push:
     branches:
-      - main  # Change to your deployment branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Checkout repository
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # ✅ Install & Authenticate Tailscale
-      - name: Install & Authenticate Tailscale
-        run: |
-          curl -fsSL https://tailscale.com/install.sh | sh
-          sudo tailscale up --authkey ${{ secrets.TAILSCALE_AUTH_KEY }}
-
-      # ✅ Setup SSH Key
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "100.106.32.37" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.RPI_HOST }}" >> ~/.ssh/known_hosts
 
-      # ✅ Deploy to Raspberry Pi
-      - name: Deploy Code
+      - name: Deploy to Raspberry Pi
         run: |
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@100.106.32.37 << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@${{ secrets.RPI_HOST }} << 'EOF'
+            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+
             # Ensure the project directory exists
             mkdir -p /home/ameen/project
             cd /home/ameen/project
 
-            # Check if Git is initialized; if not, clone it
+            # Clone or update the repo
             if [ ! -d ".git" ]; then
               git clone https://github.com/ameen-syed/project_main.git .
             else
               git pull origin main
             fi
 
-            # Install Docker Compose if missing
+            # Install Docker & Docker Compose if not installed
             if ! command -v docker-compose &> /dev/null; then
               sudo apt update
-              sudo apt install docker-compose -y
+              sudo apt install -y docker-compose
             fi
 
-            # Restart the Docker container
+            # Start the application
             docker-compose up -d --build
           EOF
