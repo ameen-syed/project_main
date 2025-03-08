@@ -1,25 +1,43 @@
-name: Deploy to Raspberry Pi
+name: Deploy to Raspberry Pi via SSH (Tailscale)
 
 on:
   push:
     branches:
-      - main
+      - main  # Change to your deployment branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      # 🔹 Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
+      # 🔹 Install Tailscale on GitHub Runner
+      - name: Install & Authenticate Tailscale
+        run: |
+          curl -fsSL https://tailscale.com/install.sh | sh
+          sudo tailscale up --authkey ${{ secrets.TAILSCALE_AUTH_KEY }}
+
+      # 🔹 Setup SSH Key for Secure Connection
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.RPI_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "100.106.32.37" >> ~/.ssh/known_hosts
 
-
-      - name: Deploy to Raspberry Pi
+      # 🔹 Test SSH Connection
+      - name: Test SSH Connection
         run: |
-          ssh ameen@${{ secrets.RPI_HOST }} "cd /path/to/your/app && git pull && docker-compose up -d"
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@100.106.32.37 "echo 'SSH Connection Successful!'"
+
+      # 🔹 Deploy Code to Raspberry Pi
+      - name: Deploy Code to Raspberry Pi
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@100.106.32.37 << 'EOF'
+            cd /home/ameen/project  # Change to your project directory
+            git pull origin main  # Pull latest changes
+            docker-compose up -d --build  # Rebuild & restart services
+          EOF
