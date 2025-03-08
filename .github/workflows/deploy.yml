@@ -1,47 +1,102 @@
-name: Deploy to Raspberry Pi
+name: Deploy to Raspberry Pi via SSH (Tailscale)
 
 on:
   push:
     branches:
-      - main
+      - main  # Change to your deployment branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      # ✅ Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
+      # ✅ Install & Authenticate Tailscale
+      - name: Install & Authenticate Tailscale
+        run: |
+          curl -fsSL https://tailscale.com/install.sh | sh
+          sudo tailscale up --authkey ${{ secrets.TAILSCALE_AUTH_KEY }}
+
+      # ✅ Setup SSH Key
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.RPI_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "100.106.32.37" >> ~/.ssh/known_hosts
 
-      - name: Deploy to Raspberry Pi
+      # ✅ Deploy to Raspberry Pi
+      - name: Deploy Code
         run: |
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@${{ secrets.RPI_HOST }} << 'EOF'
-            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@100.106.32.37 << 'EOF'
             # Ensure the project directory exists
             mkdir -p /home/ameen/project
             cd /home/ameen/project
+            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
 
-            # Clone or update the repo
+            # Check if Git is initialized; if not, clone it
             if [ ! -d ".git" ]; then
               git clone https://github.com/ameen-syed/project_main.git .
             else
               git pull origin main
             fi
 
-            # Install Docker & Docker Compose if not installed
+            # Install Docker Compose if missing
             if ! command -v docker-compose &> /dev/null; then
               sudo apt update
-              sudo apt install -y docker-compose
+              sudo apt install docker-compose -y
             fi
 
-            # Start the application
+            # Restart the Docker container
             docker-compose up -d --build
           EOF
+# name: Deploy to Raspberry Pi
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v4
+
+#       - name: Setup SSH Key
+#         run: |
+#           mkdir -p ~/.ssh
+#           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+#           chmod 600 ~/.ssh/id_ed25519
+#           ssh-keyscan -H "${{ secrets.RPI_HOST }}" >> ~/.ssh/known_hosts
+
+#       - name: Deploy to Raspberry Pi
+#         run: |
+#           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ameen@${{ secrets.RPI_HOST }} << 'EOF'
+#             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+
+#             # Ensure the project directory exists
+#             mkdir -p /home/ameen/project
+#             cd /home/ameen/project
+
+#             # Clone or update the repo
+#             if [ ! -d ".git" ]; then
+#               git clone https://github.com/ameen-syed/project_main.git .
+#             else
+#               git pull origin main
+#             fi
+
+#             # Install Docker & Docker Compose if not installed
+#             if ! command -v docker-compose &> /dev/null; then
+#               sudo apt update
+#               sudo apt install -y docker-compose
+#             fi
+
+#             # Start the application
+#             docker-compose up -d --build
+#           EOF
