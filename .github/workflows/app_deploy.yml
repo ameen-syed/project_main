@@ -101,9 +101,14 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Obfuscate Python Code with PyArmor
+      - name: 'python:3.9-slim'
+        id: Armor
         run: |
-          pip install pyarmor && pyarmor gen app.py
+          'pip install pyarmor && pip install flask && pyarmor gen app.py'
+
+      # - name: Obfuscate Python Code with PyArmor
+      #   run: |
+      #     pip install pyarmor && pyarmor gen app.py
 
       # ✅ Set up QEMU (for cross-platform builds)
       - name: Set up QEMU
