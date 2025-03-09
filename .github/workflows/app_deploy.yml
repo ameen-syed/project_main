@@ -101,13 +101,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Obfuscate Python Code with PyArmor in ARM64
-        run: |
-          docker run --rm --platform linux/arm64 -v $PWD:/src -w /src arm64v8/python:3.9 sh -c "
-            pip install pyarmor flask &&
-            pyarmor gen app.py
-          "
-
 
       # - name: 'python:3.9-slim'
       #   id: Armor
@@ -125,6 +118,15 @@ jobs:
       # ✅ Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      
+
+      - name: Obfuscate Python Code with PyArmor in ARM64
+        run: |
+          docker run --rm --platform linux/arm64 -v $PWD:/src -w /src arm64v8/python:3.9 sh -c "
+            pip install pyarmor flask &&
+            pyarmor gen app.py
+          "
 
       # ✅ Log in to Docker Hub
       - name: Log in to Docker Hub
