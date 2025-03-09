@@ -104,7 +104,7 @@ jobs:
       - name: 'python:3.9-slim'
         id: Armor
         run: |
-          'pip install pyarmor && pip install flask && pyarmor gen app.py'
+          pip install pyarmor && pip install flask && pyarmor gen app.py
 
       # - name: Obfuscate Python Code with PyArmor
       #   run: |
