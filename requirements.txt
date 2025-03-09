@@ -1,1 +1,4 @@
+setuptools
+python-dev-tools
+python-pip
 RPi.GPIO
