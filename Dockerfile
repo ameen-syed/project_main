@@ -4,23 +4,23 @@ FROM arm64v8/python:latest
 # Set the working directory
 WORKDIR /app
 
-# Copy obfuscated application files
-COPY dist/ /app/
+# Install dependencies required for PyArmor runtime
+RUN apt-get update && apt-get install -y libstdc++6
 
-# Ensure runtime files are copied correctly
+# Copy the obfuscated app and runtime explicitly
+COPY dist/app.py /app/app.py
 COPY dist/pyarmor_runtime_000000 /app/pyarmor_runtime_000000
-
-# Copy requirements file
 COPY requirements.txt /app/requirements.txt
 
-# Install dependencies
+# Install Python dependencies
 RUN pip install -r requirements.txt
 
-# Set environment variable to find shared libraries
+# Set library path for the PyArmor runtime
 ENV LD_LIBRARY_PATH=/app/pyarmor_runtime_000000
 
 # Run the application
 CMD ["python", "app.py"]
+
 
 
 # # Use an ARM64-compatible base image
