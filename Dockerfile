@@ -28,4 +28,5 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install -r requirements.txt
 
 # Run the application
-CMD ["python", "app.py"]
+# CMD ["python", "app.py"]
+CMD ["python", "pyarmor_runtime.py", "app.py"]
