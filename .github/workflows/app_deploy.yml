@@ -101,10 +101,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: 'python:3.9-slim'
-        id: Armor
+      - name: Obfuscate Python Code with PyArmor in ARM64
         run: |
-          pip install pyarmor && pip install flask && pyarmor gen app.py
+          docker run --rm --platform linux/arm64 -v $PWD:/src -w /src arm64v8/python:3.9 sh -c "
+            pip install pyarmor flask &&
+            pyarmor gen app.py
+          "
+
+
+      # - name: 'python:3.9-slim'
+      #   id: Armor
+      #   run: |
+      #     pip install pyarmor && pip install flask && pyarmor gen app.py
 
       # - name: Obfuscate Python Code with PyArmor
       #   run: |
