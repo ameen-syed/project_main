@@ -5,6 +5,7 @@ WORKDIR /app
 
 # Copy the obfuscated Python files instead of the raw source code
 COPY obf/ /app/
+COPY requirements.txt /app/requirements.txt
 
 # Install dependencies (if applicable)
 RUN pip install -r requirements.txt
