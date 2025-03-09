@@ -23,6 +23,7 @@ WORKDIR /app
 # COPY . .
 COPY dist/ /app/
 COPY requirements.txt /app/requirements.txt
+COPY .pyarmor_runtime /app/.pyarmor_runtime
 
 # Install dependencies (if any)
 RUN pip install -r requirements.txt
