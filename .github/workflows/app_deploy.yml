@@ -121,12 +121,19 @@ jobs:
 
       
 
-      - name: Obfuscate Python Code with PyArmor in ARM64
+      # - name: Obfuscate Python Code with PyArmor in ARM64
+      #   run: |
+      #     docker run --rm --platform linux/arm64 -v $PWD:/src -w /src arm64v8/python:3.9 sh -c "
+      #       pip install pyarmor flask &&
+      #       pyarmor gen app.py
+      #     "
+      - name: Obfuscate Python Code with PyArmor in ARM64 (Python 3.11)
         run: |
-          docker run --rm --platform linux/arm64 -v $PWD:/src -w /src arm64v8/python:3.9 sh -c "
+          docker run --rm --platform linux/arm64 -v $PWD:/src -w /src arm64v8/python:3.11 sh -c "
             pip install pyarmor flask &&
             pyarmor gen app.py
           "
+
 
       # ✅ Log in to Docker Hub
       - name: Log in to Docker Hub
