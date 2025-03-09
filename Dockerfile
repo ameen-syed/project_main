@@ -5,7 +5,9 @@ FROM arm64v8/python:latest
 WORKDIR /app
 
 # Copy application files
-COPY . .
+# COPY . .
+COPY dist/ /app/
+COPY req.txt /app/req.txt
 
 # Install dependencies (if any)
 RUN pip install -r requirements.txt
