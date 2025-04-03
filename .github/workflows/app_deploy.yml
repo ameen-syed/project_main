@@ -90,7 +90,7 @@ name: Build and Deploy to Raspberry Pi via SSH (Tailscale)
 on:
   push:
     branches:
-      - main  # Runs when code is pushed to the main branch
+      - right_branch_wrong_ecu  # Runs when code is pushed to the main branch
 
 jobs:
   build-and-deploy:
@@ -160,7 +160,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.RPI_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.PI_HOST }}" >> ~/.ssh/known_hosts
 
       # ✅ Deploy to Raspberry Pi
       - name: Deploy to Raspberry Pi
