@@ -57,6 +57,7 @@ if __name__ == '__main__':
                 #print ("LED off")
                 GPIO.output(23,GPIO.LOW)
                 GPIO.output(2,GPIO.LOW)
+                print ("Safe")
             time.sleep(1)
  
         # Reset by pressing CTRL + C
