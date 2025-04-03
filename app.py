@@ -15,7 +15,8 @@ GPIO_ECHO = 24
 #set GPIO direction (IN / OUT)
 GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
 GPIO.setup(GPIO_ECHO, GPIO.IN)
- 
+GPIO.output(2,GPIO.LOW)
+
 def distance():
     # set Trigger to HIGH
     GPIO.output(GPIO_TRIGGER, True)
@@ -46,15 +47,16 @@ def distance():
 if __name__ == '__main__':
     try:
         while True:
-            GPIO.output(2,GPIO.HIGH)
             dist = distance()
             print ("Measured Distance = %.1f cm" % dist)
             if(dist < 10):
                 GPIO.output(23,GPIO.HIGH)
+                GPIO.output(2,GPIO.HIGH)
                 print ("Danger")
             else:
                 #print ("LED off")
                 GPIO.output(23,GPIO.LOW)
+                GPIO.output(2,GPIO.LOW)
             time.sleep(1)
  
         # Reset by pressing CTRL + C
