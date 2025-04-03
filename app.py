@@ -1,6 +1,6 @@
 #Libraries
-# import RPi.GPIO as GPIO
-# import time
+ import RPi.GPIO as GPIO
+  import time
  
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
