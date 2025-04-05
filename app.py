@@ -51,12 +51,12 @@ if __name__ == '__main__':
             print ("Measured Distance = %.1f cm" % dist)
             if(dist < 10):
                 GPIO.output(23,GPIO.HIGH)
-                GPIO.output(2,GPIO.HIGH)
+                GPIO.output(2,GPIO.LOW)
                 print ("Danger")
             else:
                 #print ("LED off")
                 GPIO.output(23,GPIO.LOW)
-                GPIO.output(2,GPIO.LOW)
+                GPIO.output(2,GPIO.HIGH)
                 print ("Safe")
             time.sleep(1)
  
