@@ -52,7 +52,7 @@ if __name__ == '__main__':
             if(dist < 10):
                 GPIO.output(23,GPIO.HIGH)
                 GPIO.output(2,GPIO.LOW)
-                print ("Danger")
+                print ("Danger ")
             else:
                 #print ("LED off")
                 GPIO.output(23,GPIO.LOW)
